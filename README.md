@@ -1,0 +1,2 @@
+# Student-Data-Management-with-Multi-Source-AI-RAG-pipeline-n8n-project-
+Automated RAG pipeline for student data management. Connects Google Drive to n8n, Google Gemini, and MongoDB Atlas. Automatically vectorizes student PDFs and enables secure, natural language queries. Eliminates manual spreadsheet lookups, maintains conversational memory, and scales seamlessly for enterprise-level academic document processing.
