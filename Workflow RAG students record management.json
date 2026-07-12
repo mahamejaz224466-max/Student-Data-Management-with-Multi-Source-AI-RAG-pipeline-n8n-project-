@@ -1,0 +1,358 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1Z_611ot3ava9aufEqvNMWAl4wTS9KNtZ",
+          "mode": "list",
+          "cachedResultName": "n8nproject",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Z_611ot3ava9aufEqvNMWAl4wTS9KNtZ"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -32
+      ],
+      "id": "3fa3e833-f1fa-4a02-8776-ddfc22bc5f6a",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "p0tNPkKKtnlReKmj",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -144,
+        -32
+      ],
+      "id": "29ba00bd-7f7f-445b-b794-cdebd0ee35ec",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "p0tNPkKKtnlReKmj",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        416,
+        -208
+      ],
+      "id": "8d45ffb5-88b7-4510-bb7d-fb3e9cc2aa75",
+      "name": "When chat message received",
+      "webhookId": "34dd48ec-4260-4188-8abf-876ad873c723"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an AI Agent designed to answer user questions using ONLY the information stored in the Knowledge Base.Your primary objective:Provide accurate, helpful, and context-aware answers based strictly on the documents available in the Knowledge Base.\nWhen the user asks a question that requires information from the Knowledge Base, you MUST call the \"Knowledge Base\" tool to retrieve relevant documents before answering.If the Knowledge Base returns relevant content, synthesize it into a clear, concise, and helpful answer.If the Knowledge Base returns no relevant content, say: \"I could not find information about this in the Knowledge Base.\n\"Rules for behavior:\nNever invent facts or rely on outside knowledge.Never answer from memory; always use the Knowledge Base tool when the question involves factual, procedural, or reference information.If the user asks something conversational or opinion-based that does not require knowledge retrieval, answer normally.When calling the Knowledge Base tool, use the user's question as the search query unless a more precise query is clearly better.After retrieving documents, summarize only the relevant parts – do not repeat entire documents Maintain a professional, friendly tone and give structured, easy-to-read answers.\nYour workflow:\nStep 1: Determine if the question requires information from the Knowledge Base.\nStep 2: If yes \\(mcall the Knowledge Base tool.\nStep 3: If no \\answer directly.\nStep 4: If the Knowledge Base returns results \\synthesize and answer.\nStep 5: If no results \\politely state that no information"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        -208
+      ],
+      "id": "a7810cf3-552e-43d1-8176-f7b51e8d648c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "databaseName": "knowledge-base",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryMongoDbChat",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        48
+      ],
+      "id": "ecd0f1c0-fe03-49b9-8aaa-a5fc0b310489",
+      "name": "MongoDB Chat Memory",
+      "credentials": {
+        "mongoDb": {
+          "id": "RnzK4ZqYLeZhcPTy",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to search and retrieve documents stored in the Knowledge Base.",
+        "mongoCollection": {
+          "__rl": true,
+          "value": "data",
+          "mode": "list",
+          "cachedResultName": "data"
+        },
+        "vectorIndexName": "databse_vector_index",
+        "topK": 10,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        16
+      ],
+      "id": "78bd4ded-0c72-4d56-997a-207ef8c45183",
+      "name": "MongoDB Atlas Vector Store",
+      "credentials": {
+        "mongoDb": {
+          "id": "RnzK4ZqYLeZhcPTy",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        864,
+        176
+      ],
+      "id": "0bb7e6b0-2bb4-4391-b515-d41ea38bb7e2",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MoH2VrZxwbP4IkSV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "52b1247e-0bc5-4c86-a696-1cadc5a25fdb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MoH2VrZxwbP4IkSV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "mongoCollection": {
+          "__rl": true,
+          "value": "data",
+          "mode": "list",
+          "cachedResultName": "data"
+        },
+        "vectorIndexName": "databse_vector_index",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        -32
+      ],
+      "id": "4fdec19a-735d-4006-98ac-dd10d9c2f695",
+      "name": "MongoDB Atlas Vector Store1",
+      "credentials": {
+        "mongoDb": {
+          "id": "RnzK4ZqYLeZhcPTy",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "binaryMode": "specificField",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        176
+      ],
+      "id": "2c227c16-137b-44a9-90dc-5195ee254562",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        16,
+        176
+      ],
+      "id": "8f037033-dfe7-4064-8ffe-c15aa932d452",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MoH2VrZxwbP4IkSV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB Atlas Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "662c467c-f91a-4d64-95ea-d942a6dd6d28",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e630be650b120676403f8a77c7d73ba125d40b1e9db22c175e7245b094ab21af"
+  },
+  "nodeGroups": [],
+  "id": "gu22rfw5Eckk4egE",
+  "tags": []
+}
